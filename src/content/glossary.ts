@@ -1,0 +1,58 @@
+import type { GlossaryEntry } from "@/lib/types";
+
+// Hover-tooltip glossary. Keys are matched case-insensitively by the [[term]]
+// inline syntax in content blocks.
+export const GLOSSARY: GlossaryEntry[] = [
+  { term: "SoC", short: "State of Charge — the fraction of usable charge currently in the cell (0–100 %)." },
+  { term: "SoH", short: "State of Health — usually remaining capacity relative to nameplate capacity; sometimes defined via resistance instead.", long: "There is no single SoH. Capacity-based SoH (Q/Q_nominal) matters for range; resistance/power-based SoH (R0/R) matters for peak power and fast charging. A truck pack can fail its power requirement before its range requirement, or vice versa." },
+  { term: "SEI", short: "Solid Electrolyte Interphase — a passivation layer that grows on the graphite anode by consuming cyclable lithium and electrolyte.", long: "The SEI forms in the first cycles and keeps growing slowly forever, because it never passivates perfectly. Its growth consumes lithium inventory (capacity loss) and thickens an ionic barrier (resistance rise). Growth is roughly diffusion-limited, which is where sqrt(time) behaviour comes from." },
+  { term: "LLI", short: "Loss of Lithium Inventory — cyclable lithium consumed by side reactions (SEI growth, plating), reducing capacity." },
+  { term: "LAM", short: "Loss of Active Material — electrode host structure becoming inaccessible (particle cracking, contact loss, dissolution)." },
+  { term: "lithium plating", short: "Metallic lithium depositing on the anode surface instead of intercalating — triggered by fast charging at low temperature or high SoC.", long: "Plating happens when the anode surface potential drops below 0 V vs Li/Li+. Part of the plated lithium reacts irreversibly (LLI), and dendritic deposits can pierce the separator — making plating both an ageing and a safety mechanism." },
+  { term: "calendar ageing", short: "Degradation that happens while the cell rests — driven by temperature and storage SoC, not by current." },
+  { term: "cycle ageing", short: "Degradation caused by charge/discharge cycling — driven by DoD, C-rate, temperature, and SoC window." },
+  { term: "DoD", short: "Depth of Discharge — how much of the capacity one cycle swings through (e.g. 80 % → 20 % is 60 % DoD)." },
+  { term: "C-rate", short: "Current normalised to capacity: 1C empties (or fills) the nominal capacity in one hour; 2C in 30 minutes." },
+  { term: "FEC", short: "Full Equivalent Cycles — total charge throughput divided by nominal capacity; 2 half-cycles of 50 % DoD = 1 FEC." },
+  { term: "EFC", short: "Equivalent Full Cycles — same as FEC: total Ah throughput / nominal Ah." },
+  { term: "Arrhenius", short: "Exponential temperature scaling of reaction rates: rate ∝ exp(−Ea/RT). Rule of thumb: ~2× faster per +10 °C." },
+  { term: "EOL", short: "End of Life — a defined SoH threshold (often 80 % capacity for traction use) where the pack no longer meets requirements." },
+  { term: "RUL", short: "Remaining Useful Life — time or FEC remaining until EOL under an assumed future usage profile." },
+  { term: "V2G", short: "Vehicle-to-Grid — using the truck battery to deliver grid services (peak shaving, arbitrage, frequency regulation) while parked." },
+  { term: "NMC", short: "Li(Ni,Mn,Co)O2 cathode — high energy density, higher calendar/cycle stress sensitivity, ~3.7 V nominal." },
+  { term: "LFP", short: "LiFePO4 cathode — lower energy density but flatter voltage, better cycle life and thermal stability, ~3.2 V nominal." },
+  { term: "OCV", short: "Open Circuit Voltage — the equilibrium voltage at a given SoC, measured with no current flowing." },
+  { term: "impedance", short: "The cell's opposition to current flow — ohmic, charge-transfer, and diffusion contributions; grows with ageing." },
+  { term: "anode potential", short: "The graphite electrode's potential vs Li/Li+. Low SoC ⇒ high anode potential; high SoC ⇒ anode near 0 V, where SEI growth and plating accelerate." },
+  { term: "P2D", short: "Pseudo-two-dimensional (Doyle–Fuller–Newman) physics-based cell model resolving solid + electrolyte transport in both electrodes." },
+  { term: "SPM", short: "Single Particle Model — reduced-order physics model treating each electrode as one representative particle." },
+  { term: "ECM", short: "Equivalent Circuit Model — resistors + RC pairs reproducing terminal voltage; the workhorse of BMS and system simulation." },
+  { term: "semi-empirical model", short: "A fitted stress-factor model whose structure (Arrhenius, sqrt-t, …) is physics-motivated but whose parameters come from ageing-test regression." },
+  { term: "Wöhler curve", short: "Fatigue-style curve mapping cycle depth (DoD) to achievable number of cycles — borrowed from mechanical fatigue analysis." },
+  { term: "FCR", short: "Frequency Containment Reserve — fast grid frequency regulation; shallow but frequent micro-cycles." },
+  { term: "TCO", short: "Total Cost of Ownership — purchase + energy + maintenance + battery replacement, the metric fleet operators actually optimise." },
+  { term: "BMS", short: "Battery Management System — monitors cells, estimates SoC/SoH, enforces safety limits, balances cells." },
+  { term: "DVA", short: "Differential Voltage Analysis — plotting dV/dQ to separate LLI from LAM signatures in slow charge/discharge curves." },
+  { term: "ICA", short: "Incremental Capacity Analysis — dQ/dV peaks track phase transitions; peak shifts/shrinkage diagnose ageing modes." },
+  { term: "EIS", short: "Electrochemical Impedance Spectroscopy — small AC perturbations across frequencies to separate impedance contributions." },
+  { term: "knee point", short: "The point where capacity fade suddenly accelerates (often plating- or LAM-driven) — the most dangerous feature to miss in lifetime prediction." },
+  { term: "cell-to-cell variation", short: "Manufacturing and thermal-gradient spread between cells of one pack; the weakest cell limits the pack." },
+  { term: "depot charging", short: "Overnight charging at the home depot, usually ≤ 1C — the gentle baseline for truck operation." },
+  { term: "opportunity charging", short: "High-power charging during driver breaks (e.g. MCS megawatt charging) — fast but ageing-intensive." },
+  { term: "electrolyte oxidation", short: "Electrolyte decomposing at the cathode surface at high potentials — a high-SoC calendar ageing driver, especially for NMC." },
+  { term: "stress factor", short: "A dimensionless multiplier expressing how one operating condition (T, SoC, DoD, C-rate) scales the degradation rate." },
+  { term: "superposition", short: "The assumption that total ageing = calendar part + cycle part, ignoring their interaction. Useful, common, and not exactly true." },
+  { term: "MCS", short: "Megawatt Charging System — the heavy-duty fast-charging standard targeting ~1 MW+ charging during mandated driver breaks." },
+  { term: "coulomb counting", short: "Estimating SoC by integrating measured current over time — accurate short-term, but drifts with sensor bias and needs periodic OCV correction." },
+  { term: "hysteresis", short: "The OCV at a given SoC differs depending on whether you arrived by charging or discharging — pronounced in LFP, complicating SoC estimation." },
+  { term: "graphite staging", short: "Lithium fills graphite in discrete ordered stages, producing voltage plateaus — which makes SoC-dependent ageing stress plateau-wise rather than smooth." },
+  { term: "rainflow counting", short: "Fatigue-analysis algorithm that decomposes an irregular SoC profile into equivalent full and partial cycles — needed for regen-heavy urban duty cycles." },
+  { term: "CEI", short: "Cathode Electrolyte Interphase — the cathode-side counterpart of the SEI; its growth contributes to impedance rise, especially on NMC at high voltage." },
+  { term: "second life", short: "Reusing packs after vehicle EOL (e.g. stationary storage) — shifts what 'end of life' means and changes the economics of degradation." },
+  { term: "gradeability", short: "A truck's ability to climb a grade at speed — a power requirement that resistance growth erodes before capacity fade ends range." },
+];
+
+export function findGlossary(term: string): GlossaryEntry | undefined {
+  const t = term.trim().toLowerCase();
+  return GLOSSARY.find((g) => g.term.toLowerCase() === t);
+}

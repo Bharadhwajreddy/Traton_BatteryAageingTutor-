@@ -1,0 +1,122 @@
+import type { Section } from "@/lib/types";
+
+export const v2gIntegration: Section = {
+  slug: "v2g-integration",
+  title: "V2G & Smart Charging Integration",
+  summary:
+    "Turning ageing into a price: marginal degradation cost, why throughput pricing misprices grid services, the calendar benefit of discharging overnight, and how ageing models live inside dispatch optimisers.",
+  prerequisites: ["model-families", "truck-use-cases"],
+  minutes: 25,
+  blocks: [
+    {
+      kind: "text",
+      depth: "core",
+      heading: "V2G changes the question",
+      body:
+        "Classical ageing analysis asks *how long does the pack last?* — a one-shot prediction. [[V2G]] asks something harder: **what does one extra kWh of throughput cost, right now, under these conditions?** The moment a parked truck can sell energy or flexibility, degradation stops being a fate and becomes a *marginal cost inside an optimisation*: every dispatch decision trades grid revenue against battery wear, and the optimiser needs that wear as a number — per kWh, per service, per hour — not as a lifetime estimate. This reframing is why everything you learned about [[stress factor]]s suddenly has cash value: a cost model that cannot distinguish a shallow cycle from a deep one, or a cool pack from a hot one, will systematically buy the wrong services with your battery.",
+      clarify:
+        "It's the difference between asking 'how long until these shoes wear out?' and 'should I walk to the shop in them right now, given what the trip pays?' The second question needs a price per step — and the honest price per step depends on the terrain, not just the step count.",
+    },
+    {
+      kind: "text",
+      depth: "core",
+      heading: "A taxonomy of services, ordered by ageing intensity",
+      body:
+        "Not all grid services stress the pack equally, and the ranking is the key intuition:\n- **Smart charging (V1G)**: no extra discharge at all — just *timing* and derating of charging you had to do anyway (cheaper hours, lower power, avoiding 100 % targets). Near-zero ageing cost, often a large share of the total value. Always the baseline to beat.\n- **[[FCR]]-style frequency regulation**: power capacity held available, delivered as shallow, frequent micro-cycles — a few percent [[DoD]] each, low energy throughput. Per euro earned, remarkably gentle.\n- **Peak shaving / load shifting**: moderate-DoD discharges at predictable times to cut a site's demand peaks; value depends on the tariff's demand charges.\n- **Day-ahead arbitrage**: buy cheap, sell dear — real energy throughput, potentially deep cycles, and the temptation to hold high [[SoC]] waiting for the price peak (a calendar cost most spreadsheets forget).\nThe ageing-relevant fingerprint of each service is its **DoD distribution, throughput, timing, and the SoC trajectory it imposes between events** — the last one being the most commonly ignored.",
+      clarify:
+        "Think of renting out a car you own anyway. V1G is letting the rental agency choose when you refuel — costs you nothing. FCR is lending it for short trips around the block. Arbitrage is regular long-distance rentals. The rental fee must cover the wear of each — and idling the car fully fuelled in a hot car park waiting for a customer is a cost too, even though the odometer never moves.",
+    },
+    {
+      kind: "equation",
+      depth: "core",
+      latex:
+        "c_{\\mathrm{deg}} \\;=\\; \\underbrace{E_{\\mathrm{pack}} \\cdot p_{\\mathrm{pack}}}_{\\text{pack value}} \\cdot \\frac{\\Delta SoH_{\\mathrm{extra}}}{1 - SoH_{\\mathrm{EOL}}}",
+      label: "Marginal degradation cost (linear SoH-budget pricing)",
+      explanation:
+        "The pack's replacement value (energy E_pack times price per kWh, e.g. 500 kWh × 120 €/kWh = 60 k€) is amortised over its total [[SoH]] budget — the distance from 100 % to the [[EOL]] threshold, e.g. 1 − 0.8 = 20 percentage points. Each extra increment of SoH loss ΔSoH_extra caused by a V2G action is billed its proportional share: burning 0.1 % extra SoH on a 60 k€ pack with a 20-point budget costs 0.001/0.2 × 60 000 = 300 €. The 'extra' matters: it is the SoH difference between the dispatch *with* the action and the counterfactual *without* it — degradation that would have happened anyway (calendar fade while parked) is not chargeable to V2G. This is exactly the formula this app's `simulateV2g` uses to monetise the SoH gap between baseline and V2G trajectories.",
+    },
+    {
+      kind: "text",
+      depth: "core",
+      heading: "Now criticise that formula",
+      body:
+        "The linear SoH-budget price is the standard first move, and you should immediately distrust it on three counts. **(1) Fade is nonlinear in time and throughput** — with calendar t^0.5 and cycle FEC^z behaviour, the *same* action destroys different amounts of SoH depending on where in life the pack is: early on, the √t calendar term is steep and extra rest-SoC is expensive; later, an incremental FEC costs less SoH than the first ones did (until a [[knee point]] makes everything catastrophically dearer). A constant €/SoH-point therefore mis-prices both ends of life. **(2) Marginal cost is profile-dependent** — because stress factors are nonlinear, the cost of tonight's discharge depends on what the rest of the day did to temperature, mean SoC, and DoD distribution; degradation increments don't superpose linearly across actions. **(3) The budget endpoint is soft** — packs don't die at exactly 80 %, second-life value exists, and warranty terms create kinks in the true value function. The honest method: compute ΔSoH_extra from a *simulation pair* (with/without the action, full nonlinear model) rather than from a constant per-kWh tariff — which is precisely what the dispatch tool below does.",
+      clarify:
+        "Linear pricing is like billing car wear at a flat 5 cents/km forever. In truth the first kilometres of a new car cost more in depreciation, a mountain pass costs more than a motorway, and once the gearbox starts grinding, every kilometre is suddenly very expensive. The flat rate is a useful average and a poor marginal price — and optimisers respond to marginal prices.",
+    },
+    {
+      kind: "text",
+      depth: "core",
+      heading: "Why pure-throughput pricing misprices V2G",
+      body:
+        "Run the comparison explicitly, because this is the single most consequential modelling choice in V2G economics. A pure-Ah model charges every kWh of throughput the same wear fee. A stress-factor model says wear per [[FEC]] scales with g_DoD · g_C · g_T. Consequences:\n- **[[FCR]] micro-cycles get overcharged** by the throughput model: at 3–5 % DoD the Wöhler-like DoD factor is near its floor, so the true per-FEC cost is far below average. Throughput pricing makes FCR look barely profitable when it is often the best €-per-SoH service on the menu.\n- **Hot-day deep arbitrage gets undercharged**: 70 % DoD at 35 °C pack temperature carries DoD and temperature multipliers well above one — the throughput model quietly subsidises exactly the dispatch that hurts most.\n- **Calendar effects are priced at zero**, so holding the pack at 95 % SoC all afternoon waiting for the evening price peak looks free. It is not, especially for [[NMC]].\nAn optimiser maximising revenue minus a *wrong* cost signal doesn't just earn slightly less — it actively steers the asset toward the mispriced damage.",
+      clarify:
+        "Flat-fee pricing in a restaurant: charge every diner the average bill and the salad-eaters flee while the lobster-eaters multiply — adverse selection. A throughput-priced battery suffers the same fate: the gentle services walk away from the overpriced fee, the harsh services feast on the subsidy, and the pack picks up the tab.",
+    },
+    {
+      kind: "text",
+      depth: "core",
+      heading: "The non-obvious one: V2G can *reduce* calendar ageing",
+      body:
+        "Here is the result that surprises every student and most spreadsheets. A truck that finishes its route and immediately charges to a high SoC spends the whole night parked near the top of the SoC axis — where the calendar [[stress factor]] is steepest. Now let the same truck **discharge into the grid in the evening and recharge just before departure**: it earns arbitrage revenue *and* spends those parked hours at a much lower mean SoC, where SEI growth is slower. The cycle term gets worse (extra FEC), the calendar term gets *better* (lower parking SoC), and the net can genuinely favour V2G — particularly for NMC with its steep f_SoC, for long parking durations, and early in life where the √t calendar slope is steep. This is why the only defensible accounting compares full trajectories against the **counterfactual**: ΔSoH_extra = SoH_baseline − SoH_V2G can be smaller than the cycle cost alone, and occasionally negative. A model without a calendar–SoC term is structurally incapable of finding this effect — it can only ever report V2G as damage.",
+      clarify:
+        "Like renting out your holiday flat in the off-season: yes, tenants cause some wear (cycling), but an occupied, ventilated, heated flat also avoids the slow damp rot of standing empty (parking full). Whether renting pays depends on tenant versus rot — and a bookkeeping system that doesn't know rot exists will always tell you renting is pure loss.",
+    },
+    {
+      kind: "tool",
+      depth: "core",
+      tool: "v2g-dispatch",
+      note: "Compare FCR vs arbitrage on NMC and LFP and watch where net value flips sign. Then check the SoH traces: find a setting where the V2G trajectory ages *slower* than baseline thanks to the mean-SoC shift.",
+    },
+    {
+      kind: "text",
+      depth: "core",
+      heading: "Putting the ageing model inside the optimiser",
+      body:
+        "Two architectures dominate, trading fidelity against tractability:\n- **Simulation-in-the-loop**: the optimiser (or a heuristic / reinforcement-learning policy) proposes a dispatch; the full electro-thermal + ageing simulation evaluates it; repeat. Maximum fidelity — every nonlinearity and feedback intact — but each evaluation is expensive and gradient-free, so it suits offline studies, strategy comparison, and policy training rather than real-time markets.\n- **Degradation-as-cost-term**: embed a simplified ageing cost directly in a MILP or MPC formulation. The nonlinear stress factors won't fit a linear solver, so they get **piecewise-linearised**: the DoD factor becomes a few segments with binary or SOS2 variables (rainflow-ish cycle accounting per segment), the calendar SoC factor becomes a convex piecewise penalty on resting SoC, temperature enters via scenario parameters. You lose the interactions; you gain a solver that closes a 24-hour dispatch in seconds with optimality guarantees.\nThe professional compromise is hierarchical: linearised costs inside the fast dispatch layer, full simulation re-evaluating the chosen schedule and recalibrating the linearisation — so the cheap model is regularly disciplined by the honest one.",
+      clarify:
+        "It's chess engine design: you cannot run a deep, exact evaluation at every node, so you use a fast approximate evaluation in the search and the expensive analysis only on the principal line. The trick that makes it sound is the feedback loop — the fast evaluator is continually corrected by the slow one, instead of drifting off on its own.",
+    },
+    {
+      kind: "equation",
+      depth: "core",
+      latex:
+        "\\max_{P_t} \\; \\sum_{t} \\Big[ \\pi_t \\, P_t \\, \\Delta t \\; - \\; c_{\\mathrm{deg}}(SoC_t,\\, DoD,\\, T_t) \\, |P_t| \\, \\Delta t \\Big] \\quad \\text{s.t.} \\;\\; SoC_{t+1} = SoC_t - \\tfrac{P_t \\, \\Delta t}{E_{\\mathrm{pack}}}, \\;\\; SoC_{\\min} \\le SoC_t \\le SoC_{\\max}, \\;\\; SoC_{t_{\\mathrm{dep}}} \\ge SoC_{\\mathrm{route}}",
+      label: "Dispatch objective sketch (degradation-as-cost-term)",
+      explanation:
+        "P_t is grid power at time t (positive = discharging to grid), π_t the price, so the first term is revenue. The second term bills every kWh of throughput a state-dependent degradation cost — note c_deg is written as a function of SoC, DoD, and temperature, which is exactly what the piecewise-linearisation must approximate. Constraints: SoC bookkeeping (efficiency terms omitted here for clarity), operating-window limits, and the constraint that actually rules truck V2G — **the pack must hold enough charge for tomorrow's route at departure time t_dep**. Real formulations add charger power limits, warranty caps (below), and reserve-capacity constraints for FCR-type products. Everything interesting hides inside c_deg: make it a constant and you have rebuilt the throughput model with extra steps.",
+    },
+    {
+      kind: "text",
+      depth: "deeper",
+      heading: "Rolling horizons, SoH as a state, and end-of-horizon myopia",
+      body:
+        "Degradation couples timescales that optimisation would prefer to keep apart: dispatch decides over hours, ageing accumulates over years. The standard resolution is a **rolling horizon with SoH carried as a slow state**: optimise 24–48 h with the current SoH and resistance frozen (they barely move in a day), execute, integrate the ageing model to update SoH, re-linearise the cost terms around the new state, repeat. Subtleties worth a thesis chapter: (1) **myopia** — a daily optimiser sees only its own horizon's degradation, but the *value* of SoH is its entire future earning capacity, so you need an end-of-horizon SoH valuation (a shadow price on health), ideally derived from a long-horizon run rather than assumed; (2) the linearisation point drifts with age — a fixed €/kWh tariff calibrated on the fresh pack becomes systematically wrong by year five; (3) near a suspected [[knee point]] the marginal cost is dominated by *risk*, not expectation — pure expected-cost dispatch under-prices actions that move the pack toward the knee-trigger region (high SoC + cold fast charge), which argues for chance constraints or hard operational guards rather than prices alone.",
+    },
+    {
+      kind: "text",
+      depth: "core",
+      heading: "Revenue stacking and the warranty wall",
+      body:
+        "Real deployments rarely sell one service: a depot stacks self-consumption optimisation, demand-charge peak shaving, FCR capacity in qualifying hours, and occasional arbitrage — each with its own availability requirements, and all competing for the same SoC headroom and the same SoH budget. Stacking is where naïve degradation pricing breaks first, because the *combination's* fade is not the sum of each service evaluated alone (mean SoC, temperature, and DoD distributions interact). And looming over all of it: the **battery warranty**, which is typically written not in SoH but in *operational proxies* — maximum FEC per year, DoD caps, SoC-window limits, temperature clauses. In the optimisation these are **hard constraints, not costs**: exceeding them doesn't cost a calculable number of euros, it voids the coverage on a six-figure pack. Many real V2G programmes are shaped less by electrochemistry than by which dispatch behaviours the warranty's lawyers anticipated. Negotiating *V2G-aware warranty terms* — ideally written against a transparent, agreed ageing model — is as much an enabler as any algorithm in this section.",
+      clarify:
+        "Your phone's warranty doesn't lapse gradually as you mistreat the phone — it survives until you visibly cross a line, then it's gone entirely. Cliff-edge penalties like that can't be handled with prices and trade-offs; you fence them off with hard rules, and the interesting negotiation is where the fence gets built.",
+    },
+    {
+      kind: "callout",
+      depth: "core",
+      tone: "truck",
+      title: "Why depot trucks beat passenger cars at V2G",
+      body:
+        "A depot fleet of 20 electric trucks at 500 kWh each is a **multi-MWh virtual power plant** that parks 12 hours every night, at one grid connection, behind one meter, with routes known days in advance. Compare passenger-car V2G: small packs, scattered connection points, unannounced departures, and an owner who will absolutely leave for the airport at 5 a.m. unplanned. The truck fleet offers schedulable capacity with quantifiable departure constraints — exactly what the dispatch formulation above needs — plus professional asset management willing to read an SoH report. The economics also concentrate: one depot's aggregation is one negotiation, not ten thousand consumer apps. If V2G earns money anywhere first at scale, it is behind a logistics depot's fence.",
+    },
+    {
+      kind: "callout",
+      depth: "core",
+      tone: "misconception",
+      title: "\"V2G destroys the battery\" vs \"V2G is basically free\" — both wrong",
+      body:
+        "The pessimist's error: treating every V2G kWh as if it were a deep, hot cycle, usually via a throughput price calibrated on harsh lab cycling — this kills FCR and smart-charging business cases that are genuinely sound. The optimist's error: citing the calendar-benefit effect (lower overnight SoC) as if it made all V2G costless — it offsets, it does not absolve, and it shrinks for [[LFP]]'s flatter f_SoC and for short parking windows. The truth is that the answer is **a number**: ΔSoH against the honest counterfactual, monetised against pack value, computed per chemistry, per service, per season. That number can land on either side of zero. Anyone asserting the sign of V2G degradation economics without naming the chemistry, the service, and the counterfactual parking SoC is doing rhetoric, not engineering.",
+    },
+  ],
+};

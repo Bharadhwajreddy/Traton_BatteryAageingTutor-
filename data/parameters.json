@@ -1,0 +1,63 @@
+{
+  "_comment": "Literature-TYPICAL (not paper-exact) semi-empirical ageing parameters for teaching. Calibrated so that trends and orders of magnitude match published NMC/graphite and LFP/graphite ageing studies. Do NOT use for engineering sign-off.",
+  "reference": {
+    "packEnergyKWh": 500,
+    "packUsableFraction": 0.9,
+    "packCostEurPerKWh": 120,
+    "eolSohFraction": 0.8,
+    "tRefK": 298.15,
+    "gasConstant": 8.314
+  },
+  "chemistries": {
+    "NMC": {
+      "label": "NMC (e.g. NMC622/811 + graphite)",
+      "calendar": {
+        "kRefPerSqrtDay": 0.00065,
+        "activationEnergyJPerMol": 50000,
+        "socStress": { "a": 0.45, "b": 0.4, "c": 2.2, "highSocKnee": 0.85, "highSocPenalty": 1.6 },
+        "timeExponent": 0.5
+      },
+      "cycle": {
+        "kRefPerFec": 0.000011,
+        "fecExponent": 1.0,
+        "dodStress": { "quadratic": 1.8, "linear": 0.4 },
+        "cRateStress": { "base": 0.75, "exp": 0.55 },
+        "tOptC": 25,
+        "tWidthC": 22,
+        "lowTempPlating": { "thresholdC": 10, "perDegree": 0.09, "chargeCrateGate": 0.7 }
+      },
+      "resistance": {
+        "kCalPerSqrtDay": 0.00075,
+        "kCycPerFec": 0.000012
+      }
+    },
+    "LFP": {
+      "label": "LFP (LiFePO4 + graphite)",
+      "calendar": {
+        "kRefPerSqrtDay": 0.00042,
+        "activationEnergyJPerMol": 42000,
+        "socStress": { "a": 0.6, "b": 0.25, "c": 1.6, "highSocKnee": 0.95, "highSocPenalty": 1.8 },
+        "timeExponent": 0.5
+      },
+      "cycle": {
+        "kRefPerFec": 0.0000065,
+        "fecExponent": 1.0,
+        "dodStress": { "quadratic": 1.1, "linear": 0.5 },
+        "cRateStress": { "base": 0.8, "exp": 0.45 },
+        "tOptC": 27,
+        "tWidthC": 25,
+        "lowTempPlating": { "thresholdC": 8, "perDegree": 0.1, "chargeCrateGate": 0.6 }
+      },
+      "resistance": {
+        "kCalPerSqrtDay": 0.0005,
+        "kCycPerFec": 0.000008
+      }
+    }
+  },
+  "v2gStrategies": {
+    "none": { "label": "No V2G (charge for driving only)", "extraFecPerDay": 0, "revenueEurPerDay": 0, "meanSocShift": 0 },
+    "peakShaving": { "label": "Depot peak shaving", "extraFecPerDay": 0.15, "revenueEurPerDay": 9, "meanSocShift": -0.05 },
+    "arbitrage": { "label": "Energy arbitrage (day-ahead)", "extraFecPerDay": 0.35, "revenueEurPerDay": 18, "meanSocShift": 0 },
+    "fcr": { "label": "Frequency regulation (FCR-style)", "extraFecPerDay": 0.08, "revenueEurPerDay": 14, "meanSocShift": 0.05 }
+  }
+}
