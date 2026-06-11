@@ -80,11 +80,14 @@ function renderBody(body: string): ReactNode {
 
 // ---------- callout styling ----------
 
-const TONE_STYLE: Record<CalloutTone, { border: string; bg: string; icon: string; label: string }> = {
-  misconception: { border: "border-rose-500/50", bg: "bg-rose-500/10", icon: "⚠️", label: "Common misconception" },
-  truck: { border: "border-amber-500/50", bg: "bg-amber-500/10", icon: "🚛", label: "Truck reality" },
-  tip: { border: "border-emerald-500/50", bg: "bg-emerald-500/10", icon: "💡", label: "Practical tip" },
-  assumption: { border: "border-violet-500/50", bg: "bg-violet-500/10", icon: "📌", label: "Working assumption" },
+const TONE_STYLE: Record<
+  CalloutTone,
+  { border: string; bg: string; icon: string; label: string; accent: string; glow: string }
+> = {
+  misconception: { border: "border-rose-500/40", bg: "bg-rose-500/[0.07]", icon: "⚠️", label: "Common misconception", accent: "text-rose-300", glow: "bg-rose-500/20" },
+  truck: { border: "border-amber-500/40", bg: "bg-amber-500/[0.07]", icon: "🚛", label: "Truck reality", accent: "text-amber-300", glow: "bg-amber-500/20" },
+  tip: { border: "border-emerald-500/40", bg: "bg-emerald-500/[0.07]", icon: "💡", label: "Practical tip", accent: "text-emerald-300", glow: "bg-emerald-500/20" },
+  assumption: { border: "border-violet-500/40", bg: "bg-violet-500/[0.07]", icon: "📌", label: "Working assumption", accent: "text-violet-300", glow: "bg-violet-500/20" },
 };
 
 // ---------- the block renderer ----------
@@ -103,7 +106,10 @@ export function BlockView({ block, clarify }: { block: Block; clarify: boolean }
           </span>
         )}
         {block.heading && (
-          <h3 className="mt-6 mb-2 text-xl font-semibold text-slate-100">{block.heading}</h3>
+          <h3 className="mt-7 mb-2 flex items-center gap-2.5 text-xl font-bold text-slate-100">
+            <span className="h-5 w-1 rounded-full bg-gradient-to-b from-sky-400 to-emerald-400" />
+            {block.heading}
+          </h3>
         )}
         {useClarify && (
           <span className="mb-1 inline-block rounded bg-sky-500/20 px-2 py-0.5 text-xs font-medium text-sky-300">
@@ -117,16 +123,18 @@ export function BlockView({ block, clarify }: { block: Block; clarify: boolean }
 
   if (block.kind === "equation") {
     return (
-      <div className={`my-4 rounded-xl border border-slate-700 bg-slate-900/70 p-4 ${deeperFrame}`}>
+      <div className={`my-5 overflow-hidden rounded-2xl border border-slate-700/80 bg-gradient-to-br from-slate-900/90 to-slate-950/90 ${deeperFrame}`}>
         {block.label && (
-          <div className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
-            {block.label}
+          <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-900/60 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <span className="text-amber-300">ƒ(x)</span> {block.label}
           </div>
         )}
-        <div className="text-lg text-slate-100">
-          <Equation latex={block.latex} />
+        <div className="px-4 py-3">
+          <div className="text-lg text-slate-100">
+            <Equation latex={block.latex} />
+          </div>
+          <p className="mt-2 text-sm leading-relaxed text-slate-400">{renderInline(block.explanation)}</p>
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-slate-400">{renderInline(block.explanation)}</p>
       </div>
     );
   }
@@ -134,25 +142,31 @@ export function BlockView({ block, clarify }: { block: Block; clarify: boolean }
   if (block.kind === "callout") {
     const s = TONE_STYLE[block.tone];
     return (
-      <div className={`my-4 rounded-xl border ${s.border} ${s.bg} p-4 ${deeperFrame}`}>
-        <div className="mb-1 flex items-center gap-2 font-semibold text-slate-100">
-          <span>{s.icon}</span>
-          <span className="text-xs uppercase tracking-wider text-slate-400">{s.label}</span>
+      <div className={`relative my-5 overflow-hidden rounded-2xl border ${s.border} ${s.bg} p-5 ${deeperFrame}`}>
+        <div className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full ${s.glow} blur-2xl`} />
+        <div className="relative">
+          <div className="mb-1.5 flex items-center gap-2">
+            <span className="text-lg">{s.icon}</span>
+            <span className={`text-xs font-semibold uppercase tracking-wider ${s.accent}`}>{s.label}</span>
+          </div>
+          <div className="font-semibold text-slate-100">{block.title}</div>
+          <div className="mt-1 text-sm text-slate-300">{renderBody(block.body)}</div>
         </div>
-        <div className="font-semibold text-slate-100">{block.title}</div>
-        <div className="mt-1 text-sm text-slate-300">{renderBody(block.body)}</div>
       </div>
     );
   }
 
   // tool
   return (
-    <div className="my-6">
+    <div className="my-7">
       {block.note && (
-        <p className="mb-2 text-sm italic text-slate-400">
-          <span className="font-semibold not-italic text-slate-300">Try it: </span>
-          {renderInline(block.note)}
-        </p>
+        <div className="mb-3 flex items-start gap-2 rounded-xl border border-sky-500/30 bg-sky-500/[0.06] p-3 text-sm text-slate-300">
+          <span className="text-base">👉</span>
+          <span>
+            <span className="font-semibold text-sky-300">Try it: </span>
+            {renderInline(block.note)}
+          </span>
+        </div>
       )}
       <ToolHost tool={block.tool} />
     </div>

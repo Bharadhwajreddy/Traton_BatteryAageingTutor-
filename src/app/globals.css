@@ -11,6 +11,23 @@ html {
 
 body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(56, 189, 248, 0.08), transparent 60%),
+    radial-gradient(1000px 500px at 100% 10%, rgba(16, 185, 129, 0.06), transparent 55%),
+    #060a14;
+}
+
+/* gradient text helper */
+.gradient-text {
+  background: linear-gradient(110deg, #7dd3fc, #34d399 45%, #fbbf24);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* readable measure + spacing for long-form content */
+.prose-body p {
+  line-height: 1.75;
 }
 
 /* KaTeX inherits text colour; keep it readable on the dark theme */
@@ -18,14 +35,47 @@ body {
   color: #e2e8f0;
 }
 
+/* subtle grid texture for hero panels */
+.grid-texture {
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* glassy card surface */
+.glass {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: linear-gradient(#334155, #1e293b);
   border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* range slider polish */
+input[type="range"] {
+  height: 6px;
+  border-radius: 999px;
+  background: #1e293b;
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
+  cursor: pointer;
 }

@@ -78,16 +78,25 @@ export function ToolFrame({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-5 shadow-lg">
-      <div className="mb-4">
-        <h4 className="text-base font-semibold text-slate-100">🔬 {title}</h4>
-        {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
+    <div className="overflow-hidden rounded-2xl border border-slate-700/80 bg-gradient-to-br from-slate-900/80 to-slate-950/80 shadow-xl shadow-black/20">
+      <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-900/60 px-5 py-3">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/15 text-sm">🔬</span>
+        <div>
+          <h4 className="text-sm font-bold text-slate-100">{title}</h4>
+          {subtitle && <p className="text-[11px] leading-snug text-slate-500">{subtitle}</p>}
+        </div>
+        <span className="ml-auto hidden rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-300 sm:inline">
+          live model
+        </span>
       </div>
-      {children}
-      <p className="mt-3 text-[11px] text-slate-600">
-        Driven by literature-typical example parameters (see /data/parameters.json) — correct trends and orders of
-        magnitude, not a fit to any specific cell.
-      </p>
+      <div className="p-5">
+        {children}
+        <p className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-600">
+          <span>ℹ️</span>
+          Driven by literature-typical example parameters — correct trends and orders of magnitude, not a fit to any
+          specific cell.
+        </p>
+      </div>
     </div>
   );
 }
