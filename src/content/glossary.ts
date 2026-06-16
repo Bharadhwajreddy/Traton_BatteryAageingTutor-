@@ -50,6 +50,8 @@ export const GLOSSARY: GlossaryEntry[] = [
   { term: "CEI", short: "Cathode Electrolyte Interphase — the cathode-side counterpart of the SEI; its growth contributes to impedance rise, especially on NMC at high voltage." },
   { term: "second life", short: "Reusing packs after vehicle EOL (e.g. stationary storage) — shifts what 'end of life' means and changes the economics of degradation." },
   { term: "gradeability", short: "A truck's ability to climb a grade at speed — a power requirement that resistance growth erodes before capacity fade ends range." },
+  { term: "RPT", short: "Reference Performance Test — a standardised capacity + resistance check run at fixed conditions to track ageing over time, independent of the operating conditions between checks." },
+  { term: "NMC111", short: "NMC with equal Ni:Mn:Co ratio (1:1:1) — the chemistry in Schmalstieg 2014 cells; later NMC622/811 shift toward more nickel for higher energy density." },
 ];
 
 export function findGlossary(term: string): GlossaryEntry | undefined {

@@ -9,6 +9,7 @@ import { parameterIdentification } from "./sections/parameter-identification";
 import { v2gIntegration } from "./sections/v2g-integration";
 import { roadmap } from "./sections/roadmap";
 import { literature } from "./sections/literature";
+import { schmalstieg2014 } from "./sections/schmalstieg2014";
 
 // Order matters only for the suggested learning path; navigation is free.
 export const SECTIONS: Section[] = [
@@ -22,6 +23,7 @@ export const SECTIONS: Section[] = [
   v2gIntegration,
   roadmap,
   literature,
+  schmalstieg2014,
 ];
 
 export function getSection(slug: string): Section | undefined {
@@ -34,4 +36,5 @@ export const CONCEPT_GROUPS: { label: string; slugs: string[] }[] = [
   { label: "Application Context", slugs: ["truck-use-cases", "v2g-integration"] },
   { label: "Modelling", slugs: ["model-families", "parameter-identification", "roadmap"] },
   { label: "Research Landscape", slugs: ["literature"] },
+  { label: "Key Paper Deep-Dive", slugs: ["schmalstieg-2014"] },
 ];

@@ -136,6 +136,20 @@ export const SECTION_META: Record<string, SectionMeta> = {
       "Spot the heavy-duty literature gap — and the thesis opportunity inside it",
     ],
   },
+  "schmalstieg-2014": {
+    icon: "🏛️",
+    gradient: "from-yellow-500/25 via-yellow-500/10 to-transparent",
+    text: "text-yellow-300",
+    border: "border-yellow-500/40",
+    chip: "bg-yellow-500/15 text-yellow-300",
+    takeaways: [
+      "Explain the Schmalstieg 2014 model structure — calendar, cycle, superposition — from first principles",
+      "Derive why t^0.75 appears (not √t) and what it tells you about SEI growth in NMC/graphite",
+      "Describe the electrothermal feedback loop and why it is essential for truck/V2G simulation",
+      "Critically assess what the model cannot predict (sudden death, plating, C-rate) and which extensions address each gap",
+      "Follow the step-by-step fitting recipe to re-parameterise the model for a new cell",
+    ],
+  },
 };
 
 export const GROUP_THEME: Record<string, { icon: string; text: string; bar: string }> = {
@@ -143,4 +157,5 @@ export const GROUP_THEME: Record<string, { icon: string; text: string; bar: stri
   "Application Context": { icon: "🚛", text: "text-lime-300", bar: "bg-lime-400" },
   "Modelling": { icon: "🧩", text: "text-violet-300", bar: "bg-violet-400" },
   "Research Landscape": { icon: "📚", text: "text-indigo-300", bar: "bg-indigo-400" },
+  "Key Paper Deep-Dive": { icon: "🏛️", text: "text-yellow-300", bar: "bg-yellow-400" },
 };
